@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from supabase import create_client
 from dotenv import load_dotenv
+from pydantic import BaseModel
 import os
 from datetime import date
 from ml import predict_patient
@@ -19,6 +20,16 @@ supabase = create_client(
     os.getenv('SUPABASE_URL'),
     os.getenv('SUPABASE_KEY')
 )
+
+class BPLog(BaseModel):
+    systolic: int
+    diastolic: int
+
+class HRLog(BaseModel):
+    bpm: int
+
+class BSLog(BaseModel):
+    bloodSugar: float
 
 @app.get("/")
 def index():
@@ -77,3 +88,15 @@ def get_leaderboard(id):
         result[i]["rank"] = i + 1
     
     return result
+
+@app.post("/logBP/{id}")
+async def log_bp(id: int, bp: BPLog):
+    supabase.table("patient").update({"sBP": [bp.systolic], "dBP": [bp.diastolic]}).eq("id", id).execute()
+
+@app.post("/logHR/{id}")
+async def log_hr(id: int, hr: HRLog):
+    supabase.table("patient").update({"heartRate": [hr.bpm]}).eq("id", id).execute()
+
+@app.post("/logBS/{id}")
+async def log_bs(id: int, bs: BSLog):
+    supabase.table("patient").update({"bloodSugar": [bs.bloodSugar]}).eq("id", id).execute()
