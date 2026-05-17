@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
-import React from 'react';
+import React, { useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -11,7 +11,6 @@ import { Collapsible } from '@/components/ui/collapsible';
 import { WebBadge } from '@/components/web-badge';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { useEffect, useState } from 'react';
 
 // Fetching from backend
 const API = 'http://127.0.0.1:8000'
@@ -32,7 +31,7 @@ function TextDisplay() {
     </ThemedView>
   );
 }
-// End of fetching from backend
+// End of fetching from 
 
 export default function TabTwoScreen() {
   const safeAreaInsets = useSafeAreaInsets();

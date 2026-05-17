@@ -22,18 +22,18 @@ def train_model():
     joblib.dump(clf, 'maternal_health_model.pkl')
     print("Model saved.")
 
-def predict_patient(age, systolic, diastolic, glucose, heartrate):
+def predict_patient(age, systolic, diastolic, sugar, heartrate):
     clf = joblib.load('maternal_health_model.pkl')
 
     patient = pd.DataFrame([{
         'Age': age,
         'SystolicBP': systolic,
         'DiastolicBP': diastolic,
-        'BS': glucose,
+        'BS': sugar,
         'BodyTemp': 98.6,
         'HeartRate': heartrate
     }])
 
     prediction = clf.predict(patient)
-    risk_names = {0: 'low risk', 1: 'mid risk', 2: 'high risk'}
-    return f"Predicted risk level: {risk_names[prediction[0]]}"
+    risk_names = {0: 'Low', 1: 'Medium', 2: 'High'}
+    return risk_names[prediction[0]]
