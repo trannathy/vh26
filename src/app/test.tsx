@@ -1,5 +1,5 @@
 import * as Device from 'expo-device';
-import { Button, Platform, StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AnimatedIcon } from '@/components/animated-icon';
@@ -8,12 +8,8 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { WebBadge } from '@/components/web-badge';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-import { useNavigation } from '@react-navigation/native';
-
 
 function getDevMenuHint() {
-  
-
   if (Platform.OS === 'web') {
     return <ThemedText type="small">use browser devtools</ThemedText>;
   }
@@ -33,9 +29,7 @@ function getDevMenuHint() {
 }
 
 export default function HomeScreen() {
-  const navigation = useNavigation();
   return (
-    
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <ThemedView style={styles.heroSection}>
@@ -60,13 +54,6 @@ export default function HomeScreen() {
             hint={<ThemedText type="code">npm run reset-project</ThemedText>}
           />
         </ThemedView>
-
-        <Button
-        title='test'
-        onPress={() => {
-        navigation.navigate('test');
-      }}
-    />
 
         {Platform.OS === 'web' && <WebBadge />}
       </SafeAreaView>
