@@ -11,6 +11,28 @@ import { Collapsible } from '@/components/ui/collapsible';
 import { WebBadge } from '@/components/web-badge';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useEffect, useState } from 'react';
+
+// Fetching from backend
+const API = 'http://127.0.0.1:8000'
+
+function TextDisplay() {
+  const [textData, setTextData] = useState('Loading...');
+
+  useEffect(() => {
+    fetch(`${API}`)
+      .then(response => response.json())
+      .then(data => {console.log('response', data); setTextData(data.Hello)})
+      .catch(error => {console.log('error', error); setTextData('Error loading data')});
+  }, []);
+
+  return (
+    <ThemedView>
+      <ThemedText>{textData}</ThemedText>
+    </ThemedView>
+  );
+}
+// End of fetching from backend
 
 export default function TabTwoScreen() {
   const safeAreaInsets = useSafeAreaInsets();

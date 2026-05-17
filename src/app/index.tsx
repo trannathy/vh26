@@ -9,11 +9,21 @@ import { ThemedView } from '@/components/themed-view';
 import { WebBadge } from '@/components/web-badge';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useNavigation } from '@react-navigation/native';
+import React from 'react';
+import { TextInput } from 'react-native';
+// import DatePicker from 'react-native-date-picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { supabase } from '../../lib/supabase';
+
 
 
 function getDevMenuHint() {
+
   
 
+  const navigation = useNavigation();
+    
+      
   if (Platform.OS === 'web') {
     return <ThemedText type="small">use browser devtools</ThemedText>;
   }
@@ -33,10 +43,42 @@ function getDevMenuHint() {
 }
 
 export default function HomeScreen() {
-  const navigation = useNavigation();
+
+
+   async function readData() {
+      try {
+        const { data } = await supabase.from('patients').select('*')
+        console.log(data)
+  
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    async function storeData(dateOfBirth: Date, sBP: number, dBP: number) {
+      const { error } = await supabase.from('patients').insert({id: 2,
+        created_at: new Date().toISOString(),
+        dob: dateOfBirth.toISOString().split('T')[0],
+        systolic_BP: [sBP],
+        diastolic_BP: [dBP]
+      })
+      console.log(error)
+    }
+
+    const [dBP, setdBP] = React.useState('0');
+    const [sBP, setsBP] = React.useState('0');
+
+
+    const [date, setDate] = React.useState(new Date())
+    const [open, setOpen] = React.useState(false)
+
   return (
+
+    
     
     <ThemedView style={styles.container}>
+      
+
       <SafeAreaView style={styles.safeArea}>
         <ThemedView style={styles.heroSection}>
           <AnimatedIcon />
@@ -62,11 +104,48 @@ export default function HomeScreen() {
         </ThemedView>
 
         <Button
-        title='test'
+        title='getData'
         onPress={() => {
-        navigation.navigate('test');
-      }}
-    />
+        readData();
+        }}
+        />
+
+
+        <TextInput
+          onChangeText={setsBP}
+          value={sBP}
+
+        />
+
+        <TextInput
+          onChangeText={setdBP}
+          value={dBP}
+
+        />
+
+        <Button title="Open" onPress={() => setOpen(true)} />
+        {open && (
+          <DateTimePicker
+            value={date}
+            mode="date"
+            onChange={(event, selectedDate) => {
+              setOpen(false);
+              if (selectedDate) setDate(selectedDate);
+            }}
+          />
+        )}
+
+        <Button
+        title='SUBMIT'
+        onPress={() => {
+          console.log(Intl.DateTimeFormat("en-GB").format(date))
+          console.log(date)
+          console.log(sBP)
+          console.log(dBP)
+          storeData(date, parseInt(sBP), parseInt(dBP));
+        }}
+        />
+        
 
         {Platform.OS === 'web' && <WebBadge />}
       </SafeAreaView>
