@@ -6,6 +6,8 @@ import os
 from datetime import date
 from ml import predict_patient
 
+load_dotenv()
+
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -14,8 +16,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 supabase = create_client(
-    os.getenv('EXPO_PUBLIC_SUPABASE_URL'),
-    os.getenv('EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY')
+    os.getenv('SUPABASE_URL'),
+    os.getenv('SUPABASE_KEY')
 )
 
 @app.get("/")
@@ -25,25 +27,25 @@ def index():
 @app.get("/calculate")
 def calculate_friends(id):
     response = supabase.table("patient").select("dob, sBP, dBP, bloodSugar, heartRate").eq("id", id).execute()
-    first_record = response[0]
+    first_record = response.data[0]
 
     dob = date.fromisoformat(first_record["dob"])
     today = date.today()
     age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
 
-    prediction = predict_patient(age, first_record["sBP"], first_record["dBP"], first_record["bloodSugar"], first_record["heartRate"])
+    prediction = predict_patient(age, int(first_record["sBP"][0]), int(first_record["dBP"][0]), int(first_record["bloodSugar"][0]), int(first_record["heartRate"][0]))
     return {
-        "sBP": first_record["sBP"],
-        "dBP": first_record["dBP"],
-        "bloodSugar": first_record["bloodSugar"],
-        "heartRate": first_record["heartRate"],
+        "sBP": int(first_record["sBP"][0]),
+        "dBP": int(first_record["dBP"][0]),
+        "bloodSugar": int(first_record["bloodSugar"][0]),
+        "heartRate": int(first_record["heartRate"][0]),
         "prediction": prediction
     }
 
 
 @app.get("/friends")
 def get_friends(id):
-    response = supabase.table("friends").select("friendID, loginDetails(firstName, lastName)").eq("id", id).execute()
+    response = supabase.table("friends").select("friendID, loginDetails!friends_friendID_fkey(firstName, lastName)").eq("id", id).execute()
 
     result = []
     for item in response.data:
@@ -59,7 +61,7 @@ def get_leaderboard(id):
     response = supabase.table("friends").select("friendID").eq("id", id).execute()
     ids_list = [f"id.eq.{id}"]
     for item in response.data:
-        ids_list.append(f"id.eq.{item}")
+        ids_list.append(f"id.eq.{item['friendID']}")
     
     board_ids = ",".join(ids_list)
     response = supabase.table("leaderboard").select("points, loginDetails(firstName, lastName)").or_(board_ids).execute()
@@ -67,11 +69,11 @@ def get_leaderboard(id):
     for item in response.data:
         first_name = item["loginDetails"]["firstName"]
         last_initial = item["loginDetails"]["lastName"][0]
-        points = int(item["points"])
+        points = item["points"]
         result.append({"name": f"{first_name} {last_initial}.", "points": points})
     
     result = sorted(result, key=lambda x: x["points"], reverse=True)
     for i in range(len(result)):
-        result[i]["rank"] = i
+        result[i]["rank"] = i + 1
     
     return result

@@ -10,7 +10,7 @@ from sklearn.ensemble import RandomForestClassifier
 def train_model():
     # Preprocessing
     df = pd.read_csv('maternal_health_risk_dataset.csv')
-    df.replace({'RiskLevel': {'low risk': 0, 'mid risk': 1, 'high risk': 2}}, inplace=True)
+    df['RiskLevel'] = df['RiskLevel'].map({'low risk': 0, 'mid risk': 1, 'high risk': 2}).astype(int)
 
     # Model Training
     X = df.drop(columns='RiskLevel')
